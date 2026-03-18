@@ -27,10 +27,11 @@ wss.on('connection', function connection(ws) {
 });
 
 app.get('/', (req, res) => {
+  console.log("Sending data!");
   res.send(`<!DOCTYPE html>
         <html>
             <head>
-                <title>Express WebSocket Demo</title>
+                <title>Portfolio Project Test</title>
                 <style>
                     body { font-family: Arial, sans-serif; margin: 40px; }
                     #messages { border: 1px solid #ccc; height: 300px; 
@@ -40,7 +41,7 @@ app.get('/', (req, res) => {
                 </style>
             </head>
             <body>
-                <h1>Express WebSocket Demo</h1>
+                <h1>Portfolio Project Test</h1>
                 <div id="messages"></div>
                 <input type="text" id="messageInput" placeholder="Enter your message">
                 <button onclick="sendMessage()">Send Message</button>
