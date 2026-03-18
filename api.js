@@ -11,6 +11,21 @@ const port = process.env.PORT || 3000;
 
 app.use(express.static('public'));
 
+const wss = new WebSocketServer({ server });
+wss.on('connection', function connection(ws) {
+    console.log('New client connected');
+
+    ws.on('message', function message(data) {
+        const messageText = data.toString();
+        console.log('Received:', messageText);
+        ws.send(`Echo: ${messageText}`);
+    });
+
+    ws.on('close', function close() {
+        console.log('Client disconnected');
+    });
+});
+
 app.get('/', (req, res) => {
   res.send(`<!DOCTYPE html>
         <html>
