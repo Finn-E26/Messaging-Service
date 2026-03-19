@@ -32,7 +32,7 @@ app.get('/', (req, res) => {
                 <input type="text" id="messageInput" placeholder="Enter your message">
                 <button onclick="sendMessage()">Send Message</button>
                 <script>
-                    const ws = new WebSocket('ws://localhost:3000');
+                    const ws = new WebSocket('ws://messaging-server-e0oe.onrender.com');
                     const messages = document.getElementById('messages');
 
                     ws.onmessage = function(event) {
@@ -91,10 +91,14 @@ function verifyCredentials() {
 
 }
 
-const result = await pool.query('SELECT NOW()');
-console.log(result.rows);
+function sendMessage() {
 
-await pool.query(`
+}
+
+//const result = await pool.query('SELECT NOW()');
+//console.log(result.rows);
+
+/*await pool.query(`
   CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
     username TEXT UNIQUE NOT NULL,
@@ -115,4 +119,4 @@ await pool.query(`
   );
 `);
 
-console.log("Database setup completed successfully.");
+console.log("Database setup completed successfully."); */
