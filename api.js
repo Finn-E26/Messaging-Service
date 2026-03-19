@@ -3,6 +3,10 @@
 import express from "express";
 import { createServer } from 'http';
 import { WebSocketServer } from 'ws';
+import pool from './db.js';
+
+const result = await pool.query('SELECT NOW()');
+console.log(result.rows);
 
 const app = express();
 const server = createServer(app);
@@ -10,21 +14,6 @@ const server = createServer(app);
 const port = process.env.PORT || 3000;
 
 app.use(express.static('public'));
-
-const wss = new WebSocketServer({ server });
-wss.on('connection', function connection(ws) {
-    console.log('New client connected');
-
-    ws.on('message', function message(data) {
-        const messageText = data.toString();
-        console.log('Received:', messageText);
-        ws.send(`Echo: ${messageText}`);
-    });
-
-    ws.on('close', function close() {
-        console.log('Client disconnected');
-    });
-});
 
 app.get('/', (req, res) => {
   console.log("Sending data!");
@@ -75,6 +64,24 @@ app.get('/', (req, res) => {
   `);
 });
 
-app.listen(port, () => {
-  console.log(`Example app listening at http://localhost:${port}`);
+const wss = new WebSocketServer({ server });
+wss.on('connection', function connection(ws) {
+    console.log('New client connected');
+
+    ws.on('message', function message(data) {
+        const messageText = data.toString();
+        console.log('Received:', messageText);
+        if (messageText == "finn,123") {
+          ws.send("Authentication successful.");
+        }
+        ws.send(`Echo: ${messageText}`);
+    });
+
+    ws.on('close', function close() {
+        console.log('Client disconnected');
+    });
+});
+
+server.listen(port, () => {
+  console.log(`Example server listening at http://localhost:${port}`);
 });

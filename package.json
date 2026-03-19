@@ -21,6 +21,7 @@
   "dependencies": {
     "cors": "^2.8.6",
     "express": "^5.2.1",
+    "pg": "^8.20.0",
     "ws": "^8.19.0"
   },
   "type": "module"
