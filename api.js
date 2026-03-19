@@ -5,8 +5,8 @@ import { createServer } from 'http';
 import { WebSocketServer } from 'ws';
 import pool from './db.js';
 
-const result = await pool.query('SELECT NOW()');
-console.log(result.rows);
+//const result = await pool.query('SELECT NOW()');
+//console.log(result.rows);
 
 const app = express();
 const server = createServer(app);
