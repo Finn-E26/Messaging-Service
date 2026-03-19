@@ -83,5 +83,36 @@ server.listen(port, () => {
   console.log(`Example server listening at http://localhost:${port}`);
 });
 
+function createAccount(username, password) {
+
+};
+
+function verifyCredentials() {
+
+}
+
 const result = await pool.query('SELECT NOW()');
 console.log(result.rows);
+
+await pool.query(`
+  CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    username TEXT UNIQUE NOT NULL,
+    hashedPassword TEXT NOT NULL,
+    authToken TEXT UNIQUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  );
+`);
+
+await pool.query(`
+  CREATE TABLE IF NOT EXISTS messages (
+    messageID SERIAL PRIMARY KEY,
+    sender TEXT NOT NULL,
+    receiver TEXT NOT NULL,
+    message TEXT,
+    sentTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    delivered BOOLEAN DEFAULT FALSE
+  );
+`);
+
+console.log("Database setup completed successfully.");
