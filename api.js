@@ -32,7 +32,7 @@ app.get('/', (req, res) => {
                 <input type="text" id="messageInput" placeholder="Enter your message">
                 <button onclick="sendMessage()">Send Message</button>
                 <script>
-                    const ws = new WebSocket('ws://messaging-server-e0oe.onrender.com');
+                    const ws = new WebSocket('wss://messaging-server-e0oe.onrender.com');
                     const messages = document.getElementById('messages');
 
                     ws.onmessage = function(event) {
