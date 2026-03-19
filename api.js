@@ -27,7 +27,7 @@ app.get('/', (req, res) => {
                 </style>
             </head>
             <body>
-                <h1>Portfolio Project Test</h1>
+                <h1>Database Initialization</h1>
                 <div id="messages"></div>
                 <input type="text" id="messageInput" placeholder="Enter your message">
                 <button onclick="sendMessage()">Send Message</button>
@@ -80,7 +80,7 @@ wss.on('connection', function connection(ws) {
 });
 
 server.listen(port, () => {
-  console.log(`Example server listening at http://localhost:${port}`);
+  console.log(`Server listening at http://localhost:${port}`);
 });
 
 function createAccount(username, password) {
@@ -110,7 +110,7 @@ await pool.query(`
     sender TEXT NOT NULL,
     receiver TEXT NOT NULL,
     message TEXT,
-    sentTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    sentTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     delivered BOOLEAN DEFAULT FALSE
   );
 `);
