@@ -75,6 +75,7 @@ wss.on('connection', function connection(ws) {
         if (msg.type == "createAccount") {
             let user = msg.username;
             let pass = msg.password;
+            createAccount(user, pass);
 
             
         }
@@ -105,7 +106,7 @@ async function createAccount(username, password) {
         console.log("Username is available.");
     }
 
-    
+
 };
 
 function verifyCredentials() {
