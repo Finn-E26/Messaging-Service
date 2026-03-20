@@ -1,4 +1,5 @@
 // https://betterstack.com/community/guides/scaling-nodejs/express-websockets/
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map - Maps
 
 import express from "express";
 import { createServer } from 'http';
@@ -9,6 +10,7 @@ const app = express();
 const server = createServer(app);
 
 const port = process.env.PORT || 3000;
+const clients = new Map();
 
 app.use(express.static('public'));
 
@@ -64,8 +66,19 @@ app.get('/', (req, res) => {
 const wss = new WebSocketServer({ server });
 wss.on('connection', function connection(ws) {
     console.log('New client connected');
+    ws.authenticated = false;
+    
 
     ws.on('message', function message(data) {
+        let msg = JSON.parse(data);
+
+        if (msg.type == "createAccount") {
+            let user = msg.username;
+            let pass = msg.password;
+
+            
+        }
+
         const messageText = data.toString();
         console.log('Received:', messageText);
         if (messageText == "finn,123") {
@@ -83,17 +96,25 @@ server.listen(port, () => {
   console.log(`Server listening at http://localhost:${port}`);
 });
 
-function createAccount(username, password) {
+async function createAccount(username, password) {
+    let result = await pool.query(`SELECT EXISTS (SELECT 1 FROM users WHERE username = '${username}');`);
+    if (result.rows[0].exists) {
+        console.log("Username Taken!");
+        return "Username Unavailable";
+    } else {
+        console.log("Username is available.");
+    }
 
+    
 };
 
 function verifyCredentials() {
 
-}
+};
 
 function sendMessage() {
 
-}
+};
 
 //const result = await pool.query('SELECT NOW()');
 //console.log(result.rows);
