@@ -125,9 +125,11 @@ async function createAccount(username, password) {
     console.log("Getting hashes......");
     let hashedPass = await hashString(password);
     let hashedToken = await hashString(generateToken(username));
-    console.log(hashedPass);
 
     result = await pool.query("INSERT INTO users (username, hashedPassword, authToken) VALUES ($1, $2, $3)", [username, hashedPass, hashedToken]);
+    console.log(JSON.stringify(result));
+    console.log(result);
+    console.log(result.rows[0]);
 
     if (result.rowCount == 1) {
         returnObj.status = true;
