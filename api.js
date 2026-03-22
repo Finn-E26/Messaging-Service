@@ -115,7 +115,7 @@ async function createAccount(username, password) {
         returnObj.message = "Sorry, that username is not available."
         return returnObj;
     } 
-
+    console.log("Getting hashes......");
     let hashedPass = hashString(password);
     let hashedToken = hashString(generateToken(username));
     console.log(hashedPass);
@@ -146,8 +146,10 @@ function sendMessage() {
 };
 
 function hashString(string) {
+    console.log("Hash function called.")
     let returnString;
     bcrypt.genSalt(10, function(err, Salt){
+        console.log("Inside the salt function now.")
         bcrypt.hash(string, Salt, function(error, hash){
             console.log("Hashing: "+hash);
             if (error) {
