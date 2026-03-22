@@ -78,7 +78,7 @@ wss.on('connection', function connection(ws) {
         let msg = JSON.parse(data);
         let string1 = await pool.query("SELECT * FROM USERS");
         console.log(string1);
-        ws.send(toString(string1));
+        ws.send(JSON.stringify(string1));
 
         if (msg.type == "createAccount") {
             let user = msg.username;
@@ -154,27 +154,15 @@ function sendMessage() {
 
 async function hashString(input) {
     console.log("Hash function called: "+input)
-    
-    bcrypt.genSalt(10, function(err, Salt){
-        console.log("Inside the salt function now.");
 
-        if (err) {
-            console.log("Error during salt.");
-            console.log(err);
-        }
-        bcrypt.hash(input, Salt, function(error, hash){
-            console.log("Hashing: "+hash);
-            if (error) {
-                console.log("Error during hash.");
-                return -1;
-            }
+    try {
+        const salt = await bcrypt.genSalt(10);
+        const hash = await bcrypt.hash(input, salt);
 
-            console.log("returning hash");
-            return hash;
-        })
-    });
-
-    return "ERROR OCCURRED: "+input;
+        return hash;
+    } catch (error) {
+        return -1;
+    }
 }
 
 function compareHash(password, hashedPass) {
