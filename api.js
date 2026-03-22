@@ -8,7 +8,7 @@ import { createServer } from 'http';
 import { WebSocketServer } from 'ws';
 import pool from './db.js';
 import jwt from 'jsonwebtoken';
-const bcrypt = require('bcryptjs');
+import bcrypt from 'bcryptjs';
 
 const app = express();
 const server = createServer(app);
