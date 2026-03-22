@@ -81,7 +81,7 @@ wss.on('connection', function connection(ws) {
             let pass = msg.password;
             let result = createAccount(user, pass);
             if (result) {
-                ws.send(JSON.stringify({type: 'authenticationResult', content: 'Account Created Successfully.'}));
+                ws.send(JSON.stringify({type: 'authenticationResult', content: 'Account Created Successfully.', token: ''}));
             } else {
                 ws.send(JSON.stringify({type: 'authenticationResult', content: `Account Creation Failed: ${result}`}));
             }
@@ -106,10 +106,13 @@ server.listen(port, () => {
 });
 
 async function createAccount(username, password) {
+    let returnObj = {status: false, message: '', other: ''}
     let result = await pool.query(`SELECT EXISTS (SELECT 1 FROM users WHERE username = '${username}');`);
     if (result.rows[0].exists) {
         console.log("Username Taken!");
-        return "Sorry, that username is not available.";
+        returnObj.status = false;
+        returnObj.message = "Sorry, that username is not available."
+        return returnObj;
     } 
 
     hashedPass = hashString(password);
@@ -119,9 +122,16 @@ async function createAccount(username, password) {
     result = await pool.query("INSERT INTO users (username, hashedPassword, authToken) VALUES ($1, $2, $3)", [username, hashedPass, hashedToken]);
 
     if (result.rowCount == 1) {
-        return true;
+        returnObj.status = true;
+        returnObj.message = "Account created successfully!";
+        returnObj.message = result.rows[0];
+
+        return returnObj;
     } else {
-        return false;
+        returnObj.status = false;
+        returnObj.message = "An error occurred during account creation.";
+        
+        return returnObj;
     }
 
 };
