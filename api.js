@@ -78,7 +78,7 @@ wss.on('connection', function connection(ws) {
         let msg = JSON.parse(data);
         let string1 = await pool.query("SELECT * FROM USERS");
         console.log(string1);
-        ws.send(JSON.stringify(string1));
+        //ws.send(JSON.stringify(string1));
 
         if (msg.type == "createAccount") {
             let user = msg.username;
@@ -132,7 +132,7 @@ async function createAccount(username, password) {
     if (result.rowCount == 1) {
         returnObj.status = true;
         returnObj.message = "Account created successfully!";
-        returnObj.message = result.rows[0];
+        returnObj.other = JSON.stringify(result.rows[0]);
 
         return returnObj;
     } else {
@@ -161,6 +161,7 @@ async function hashString(input) {
 
         return hash;
     } catch (error) {
+        console.log("ATTENTION: Error during hashing.");
         return -1;
     }
 }
