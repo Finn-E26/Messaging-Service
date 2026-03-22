@@ -181,7 +181,7 @@ async function verifyCredentials(type, username, password, ws) {
         try {
             let payload = jwt.decode(username);
 
-            if (jwt.verify(username)) {
+            if (jwt.verify(username, process.env.JWT_SECRET)) {
                 ws.authenticated = true;
                 ws.username = payload.username;
                 ws.userId = payload.id;
