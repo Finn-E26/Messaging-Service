@@ -73,17 +73,18 @@ wss.on('connection', function connection(ws) {
     ws.authenticated = false;
     
 
-    ws.on('message', function message(data) {
+    ws.on('message', async function message(data) {
         let msg = JSON.parse(data);
 
         if (msg.type == "createAccount") {
             let user = msg.username;
             let pass = msg.password;
-            let result = createAccount(user, pass);
+            let result = await createAccount(user, pass);
+            
             if (result.status) {
-                ws.send(JSON.stringify({type: 'authenticationResult', content: result.message, token: result.other}));
+                ws.send(JSON.stringify({type: 'authenticationResult', 'content': `hello`, 'token': `${result.other}`}));
             } else {
-                ws.send(JSON.stringify({type: 'authenticationResult', content: result.message}));
+                ws.send(JSON.stringify({type: 'authenticationResult', content: `${result.message}`}));
             }
             
         }
