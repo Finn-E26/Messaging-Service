@@ -116,8 +116,8 @@ async function createAccount(username, password) {
         return returnObj;
     } 
 
-    hashedPass = hashString(password);
-    hashedToken = hashString(generateToken(username));
+    let hashedPass = hashString(password);
+    let hashedToken = hashString(generateToken(username));
     console.log(hashedPass);
 
     result = await pool.query("INSERT INTO users (username, hashedPassword, authToken) VALUES ($1, $2, $3)", [username, hashedPass, hashedToken]);
