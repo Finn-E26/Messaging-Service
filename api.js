@@ -72,10 +72,6 @@ wss.on('connection', function connection(ws) {
     console.log('New client connected');
     ws.authenticated = false;
 
-    pool.query("DELETE FROM users; ALTER TABLE users RENAME COLUMN authToken TO role");
-    
-    
-
     ws.on('message', async function message(data) {
         let msg = JSON.parse(data);
 
@@ -93,9 +89,11 @@ wss.on('connection', function connection(ws) {
             }
             
         } else if (msg.type == "login") {
-            
+            let result = await verifyCredentials("login", username, password);
+            ws.send(JSON.stringify({type:"authenticationResult", content: result.message, token: result.other}));
         } else if (msg.type == "authenticate") {
-
+            let result = await verifyCredentials("authenticate", msg.token);
+            ws.send(JSON.stringify({type:"authenticationResult", content: result.message, token: result.other}));
         }
 
         const messageText = data.toString();
@@ -116,7 +114,7 @@ server.listen(port, () => {
 });
 
 async function createAccount(username, password) {
-    let returnObj = {status: false, message: '', other: ''}
+    let returnObj = {status: false, message: '', other: ''};
     let result = await pool.query(`SELECT EXISTS (SELECT 1 FROM users WHERE username = '${username}');`);
     if (result.rows[0].exists) {
         console.log("Username Taken!");
@@ -133,8 +131,13 @@ async function createAccount(username, password) {
     if (result.rowCount >= 1) {
         returnObj.status = true;
         returnObj.message = "Account created successfully!";
-        token = await pool.query("SELECT hashedPassword FROM users WHERE username = ($1)", [username]);
-        returnObj.other = token;
+        let id = await pool.query("SELECT id FROM users  WHERE username = ($1)", [username]);
+        returnObj.other = generateToken(username, id);
+
+        ws.authenticated = true;
+        ws.username = username;
+        ws.userId = id;
+        clients.set(username, ws);
 
         return returnObj;
     } else {
@@ -151,12 +154,18 @@ async function verifyCredentials(type, username, password) {
     if (type == "login") {
         try {
             const hashedPass = await pool.query("SELECT hashedPassword FROM users WHERE username = ($1)",[username]);
+            const id = await pool.query("SELECT id FROM users WHERE username = ($1)",[username]);
             if (bcrypt.compare(password, hashedPass)) {
-                const token = generateToken(username);
-
+                const token = generateToken(username, id);
                 returnObj.status = true;
                 returnObj.message = "Authentication Successful!";
                 returnObj.other = token;
+
+                ws.authenticated = true;
+                ws.username = username;
+                ws.userId = id;
+                clients.set(username, ws);
+
             } else {
                 returnObj.status = false;
                 returnObj.message = "The entered username and password are not correct.";
@@ -167,7 +176,15 @@ async function verifyCredentials(type, username, password) {
         }
     } else if (type == "authenticate") {
         try {
-            
+            let payload = jwt.decode(username);
+
+            if (jwt.verify(username)) {
+                ws.authenticated = true;
+                ws.username = payload.username;
+                ws.userId = payload.id;
+                clients.set(username, ws);
+
+            }
         } catch (error) {
             returnObj.status = false;
             returnObj.message = "An error occurred during authentication. Please try again.";
@@ -205,8 +222,8 @@ function compareHash(password, hashedPass) {
     })
 }
 
-function generateToken(user) {
-    const payload = {username: user};
+function generateToken(user, id) {
+    const payload = {username: user, userId: id};
     const secret = process.env.JWT_SECRET;
 
     const token = jwt.sign(payload, secret);
