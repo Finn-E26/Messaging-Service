@@ -71,11 +71,11 @@ const wss = new WebSocketServer({ server });
 wss.on('connection', async function connection(ws) {
     console.log('New client connected');
     ws.authenticated = false;
-    console.log(await pool.query("SELECT * FROM users"));
+    console.log(await pool.query("/d users"));
 
     ws.on('message', async function message(data) {
         let msg = JSON.parse(data);
-        console.log(await pool.query("SELECT * FROM users"));
+        //console.log(await pool.query("SELECT * FROM users"));
 
         if (msg.type == "createAccount") {
             let user = msg.username;
