@@ -1,10 +1,14 @@
 // https://betterstack.com/community/guides/scaling-nodejs/express-websockets/
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map - Maps
+// https://www.w3schools.com/postgresql/index.php
+// https://www.geeksforgeeks.org/node-js/password-encryption-in-node-js-using-bcryptjs-module/
 
 import express from "express";
 import { createServer } from 'http';
 import { WebSocketServer } from 'ws';
 import pool from './db.js';
+import jwt from 'jsonwebtoken';
+const bcrypt = require('bcryptjs');
 
 const app = express();
 const server = createServer(app);
@@ -75,8 +79,12 @@ wss.on('connection', function connection(ws) {
         if (msg.type == "createAccount") {
             let user = msg.username;
             let pass = msg.password;
-            createAccount(user, pass);
-
+            let result = createAccount(user, pass);
+            if (result) {
+                ws.send(JSON.stringify({type: 'authenticationResult', content: 'Account Created Successfully.'}));
+            } else {
+                ws.send(JSON.stringify({type: 'authenticationResult', content: `Account Creation Failed: ${result}`}));
+            }
             
         }
 
@@ -101,11 +109,20 @@ async function createAccount(username, password) {
     let result = await pool.query(`SELECT EXISTS (SELECT 1 FROM users WHERE username = '${username}');`);
     if (result.rows[0].exists) {
         console.log("Username Taken!");
-        return "Username Unavailable";
-    } else {
-        console.log("Username is available.");
-    }
+        return "Sorry, that username is not available.";
+    } 
 
+    hashedPass = hashString(password);
+    hashedToken = hashString(generateToken(username));
+    console.log(hashedPass);
+
+    result = await pool.query("INSERT INTO users (username, hashedPassword, authToken) VALUES ($1, $2, $3)", [username, hashedPass, hashedToken]);
+
+    if (result.rowCount == 1) {
+        return true;
+    } else {
+        return false;
+    }
 
 };
 
@@ -116,6 +133,38 @@ function verifyCredentials() {
 function sendMessage() {
 
 };
+
+function hashString(string) {
+    let returnString;
+    bcrypt.genSalt(10, function(err, Salt){
+        bcrypt.hash(string, Salt, function(error, hash){
+            if (err) {
+                return -1;
+            }
+
+            return hash;
+        })
+    })
+}
+
+function compareHash(password, hashedPass) {
+    bcrypt.compare(password, hashedPass, async function(err, match) {
+        if (match) {
+            return true;
+        } else {
+            return false;
+        }
+    })
+}
+
+function generateToken(user) {
+    const payload = {username: user};
+    const secret = process.env.JWT_SECRET;
+
+    const token = jwt.sign(payload, secret);
+
+    return token;
+} 
 
 //const result = await pool.query('SELECT NOW()');
 //console.log(result.rows);
