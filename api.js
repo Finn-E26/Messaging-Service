@@ -79,6 +79,7 @@ wss.on('connection', function connection(ws) {
         if (msg.type == "createAccount") {
             let user = msg.username;
             let pass = msg.password;
+            console.log("Starting account creation");
             let result = await createAccount(user, pass);
             
             if (result.status) {
@@ -116,8 +117,8 @@ async function createAccount(username, password) {
         return returnObj;
     } 
     console.log("Getting hashes......");
-    let hashedPass = hashString(password);
-    let hashedToken = hashString(generateToken(username));
+    let hashedPass = await hashString(password);
+    let hashedToken = await hashString(generateToken(username));
     console.log(hashedPass);
 
     result = await pool.query("INSERT INTO users (username, hashedPassword, authToken) VALUES ($1, $2, $3)", [username, hashedPass, hashedToken]);
@@ -145,7 +146,7 @@ function sendMessage() {
 
 };
 
-function hashString(string) {
+async function hashString(string) {
     console.log("Hash function called.")
     let returnString;
     bcrypt.genSalt(10, function(err, Salt){
