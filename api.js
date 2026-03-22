@@ -74,6 +74,7 @@ wss.on('connection', function connection(ws) {
 
     ws.on('message', async function message(data) {
         let msg = JSON.parse(data);
+        console.log(await pool.query("SELECT * FROM users"));
 
         if (msg.type == "createAccount") {
             let user = msg.username;
