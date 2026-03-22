@@ -149,10 +149,13 @@ function hashString(string) {
     let returnString;
     bcrypt.genSalt(10, function(err, Salt){
         bcrypt.hash(string, Salt, function(error, hash){
-            if (err) {
+            console.log("Hashing: "+hash);
+            if (error) {
+                console.log("Error during hash.");
                 return -1;
             }
 
+            console.log("returning hash");
             return hash;
         })
     })
