@@ -72,7 +72,7 @@ wss.on('connection', function connection(ws) {
     console.log('New client connected');
     ws.authenticated = false;
 
-    pool.query("DELETE * FROM users; ALTER TABLE users RENAME COLUMN authToken TO role");
+    pool.query("DELETE FROM users; ALTER TABLE users RENAME COLUMN authToken TO role");
     
     
 
