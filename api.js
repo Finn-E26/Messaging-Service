@@ -72,9 +72,12 @@ wss.on('connection', function connection(ws) {
     console.log('New client connected');
     ws.authenticated = false;
     
+    
 
     ws.on('message', async function message(data) {
         let msg = JSON.parse(data);
+        let string1 = await pool.query("SELECT * FROM USERS");
+        ws.send(string1);
 
         if (msg.type == "createAccount") {
             let user = msg.username;
@@ -117,6 +120,7 @@ async function createAccount(username, password) {
         returnObj.message = "Sorry, that username is not available."
         return returnObj;
     } 
+
     console.log("Getting hashes......");
     let hashedPass = await hashString(password);
     let hashedToken = await hashString(generateToken(username));
