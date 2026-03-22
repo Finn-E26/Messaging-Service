@@ -71,7 +71,7 @@ const wss = new WebSocketServer({ server });
 wss.on('connection', async function connection(ws) {
     console.log('New client connected');
     ws.authenticated = false;
-    await pool.query("ALTER TABLE users DROP CONSTRAINT users_authtoken_key");
+    await pool.query("\d users");
     console.log(await pool.query("ALTER TABLE users DROP CONSTRAINT users_authtoken_key"));
 
     ws.on('message', async function message(data) {
