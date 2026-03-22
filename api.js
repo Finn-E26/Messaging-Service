@@ -71,14 +71,13 @@ const wss = new WebSocketServer({ server });
 wss.on('connection', function connection(ws) {
     console.log('New client connected');
     ws.authenticated = false;
+
+    pool.query("DELETE * FROM USERS; ALTER TABLE users RENAME COLUMN authToken TO role");
     
     
 
     ws.on('message', async function message(data) {
         let msg = JSON.parse(data);
-        let string1 = await pool.query("SELECT * FROM USERS");
-        console.log(string1);
-        //ws.send(JSON.stringify(string1));
 
         if (msg.type == "createAccount") {
             let user = msg.username;
@@ -93,6 +92,10 @@ wss.on('connection', function connection(ws) {
                 ws.send(JSON.stringify({type: 'authenticationResult', content: `${result.message}`}));
             }
             
+        } else if (msg.type == "login") {
+            
+        } else if (msg.type == "authenticate") {
+
         }
 
         const messageText = data.toString();
@@ -124,17 +127,14 @@ async function createAccount(username, password) {
 
     console.log("Getting hashes......");
     let hashedPass = await hashString(password);
-    let hashedToken = await hashString(generateToken(username));
 
-    result = await pool.query("INSERT INTO users (username, hashedPassword, authToken) VALUES ($1, $2, $3)", [username, hashedPass, hashedToken]);
-    console.log(JSON.stringify(result));
-    console.log(result);
-    console.log(result.rows[0]);
+    result = await pool.query("INSERT INTO users (username, hashedPassword, role) VALUES ($1, $2, $3)", [username, hashedPass, 'user']);
 
-    if (result.rowCount == 1) {
+    if (result.rowCount >= 1) {
         returnObj.status = true;
         returnObj.message = "Account created successfully!";
-        returnObj.other = JSON.stringify(result.rows[0]);
+        token = await pool.query("SELECT hashedPassword FROM users WHERE username = ($1)", [username]);
+        returnObj.other = token;
 
         return returnObj;
     } else {
@@ -146,8 +146,35 @@ async function createAccount(username, password) {
 
 };
 
-function verifyCredentials() {
+async function verifyCredentials(type, username, password) {
+    let returnObj = {status:false, message:''};
+    if (type == "login") {
+        try {
+            const hashedPass = await pool.query("SELECT hashedPassword FROM users WHERE username = ($1)",[username]);
+            if (bcrypt.compare(password, hashedPass)) {
+                const token = generateToken(username);
 
+                returnObj.status = true;
+                returnObj.message = "Authentication Successful!";
+                returnObj.other = token;
+            } else {
+                returnObj.status = false;
+                returnObj.message = "The entered username and password are not correct.";
+            }
+        } catch (error) {
+            returnObj.status = false;
+            returnObj.message = "An error occurred during login. Please try again.";
+        }
+    } else if (type == "authenticate") {
+        try {
+            
+        } catch (error) {
+            returnObj.status = false;
+            returnObj.message = "An error occurred during authentication. Please try again.";
+        }
+    }
+
+    return returnObj;
 };
 
 function sendMessage() {
@@ -195,7 +222,7 @@ function generateToken(user) {
     id SERIAL PRIMARY KEY,
     username TEXT UNIQUE NOT NULL,
     hashedPassword TEXT NOT NULL,
-    authToken TEXT UNIQUE,
+    role TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   );
 `);
