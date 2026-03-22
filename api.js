@@ -92,7 +92,7 @@ wss.on('connection', async function connection(ws) {
             }
             
         } else if (msg.type == "login") {
-            let result = await verifyCredentials("login", username, password, ws);
+            let result = await verifyCredentials("login", msg.username, msg.password, ws);
             ws.send(JSON.stringify({type:"authenticationResult", content: result.message, token: result.other}));
         } else if (msg.type == "authenticate") {
             let result = await verifyCredentials("authenticate", msg.token, "", ws);
@@ -189,6 +189,7 @@ async function verifyCredentials(type, username, password, ws) {
 
             }
         } catch (error) {
+            console.log(error);
             returnObj.status = false;
             returnObj.message = "An error occurred during authentication. Please try again.";
         }
