@@ -148,9 +148,9 @@ function sendMessage() {
 
 async function hashString(string) {
     console.log("Hash function called.")
-    let returnString;
+    
     bcrypt.genSalt(10, function(err, Salt){
-        console.log("Inside the salt function now.")
+        console.log("Inside the salt function now.");
         bcrypt.hash(string, Salt, function(error, hash){
             console.log("Hashing: "+hash);
             if (error) {
@@ -161,7 +161,9 @@ async function hashString(string) {
             console.log("returning hash");
             return hash;
         })
-    })
+    });
+
+    return "ERROR OCCURRED";
 }
 
 function compareHash(password, hashedPass) {
