@@ -81,9 +81,10 @@ wss.on('connection', function connection(ws) {
             let pass = msg.password;
             console.log("Starting account creation");
             let result = await createAccount(user, pass);
+            console.log(result);
             
             if (result.status) {
-                ws.send(JSON.stringify({type: 'authenticationResult', 'content': result.message, 'token': `${result.other}`}));
+                ws.send(JSON.stringify({type: 'authenticationResult', 'content': result.message, 'token': result.other}));
             } else {
                 ws.send(JSON.stringify({type: 'authenticationResult', content: `${result.message}`}));
             }
