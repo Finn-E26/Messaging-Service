@@ -79,7 +79,7 @@ wss.on('connection', function connection(ws) {
             let user = msg.username;
             let pass = msg.password;
             console.log("Starting account creation");
-            let result = await createAccount(user, pass);
+            let result = await createAccount(user, pass, ws);
             console.log(result);
             
             if (result.status) {
@@ -89,10 +89,10 @@ wss.on('connection', function connection(ws) {
             }
             
         } else if (msg.type == "login") {
-            let result = await verifyCredentials("login", username, password);
+            let result = await verifyCredentials("login", username, password, ws);
             ws.send(JSON.stringify({type:"authenticationResult", content: result.message, token: result.other}));
         } else if (msg.type == "authenticate") {
-            let result = await verifyCredentials("authenticate", msg.token);
+            let result = await verifyCredentials("authenticate", msg.token, "", ws);
             ws.send(JSON.stringify({type:"authenticationResult", content: result.message, token: result.other}));
         }
 
@@ -113,7 +113,7 @@ server.listen(port, () => {
   console.log(`Server listening at http://localhost:${port}`);
 });
 
-async function createAccount(username, password) {
+async function createAccount(username, password, ws) {
     let returnObj = {status: false, message: '', other: ''};
     let result = await pool.query(`SELECT EXISTS (SELECT 1 FROM users WHERE username = '${username}');`);
     if (result.rows[0].exists) {
@@ -149,7 +149,7 @@ async function createAccount(username, password) {
 
 };
 
-async function verifyCredentials(type, username, password) {
+async function verifyCredentials(type, username, password, ws) {
     let returnObj = {status:false, message:''};
     if (type == "login") {
         try {
