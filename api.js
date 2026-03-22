@@ -80,10 +80,10 @@ wss.on('connection', function connection(ws) {
             let user = msg.username;
             let pass = msg.password;
             let result = createAccount(user, pass);
-            if (result) {
-                ws.send(JSON.stringify({type: 'authenticationResult', content: 'Account Created Successfully.', token: ''}));
+            if (result.status) {
+                ws.send(JSON.stringify({type: 'authenticationResult', content: result.message, token: result.other}));
             } else {
-                ws.send(JSON.stringify({type: 'authenticationResult', content: `Account Creation Failed: ${result}`}));
+                ws.send(JSON.stringify({type: 'authenticationResult', content: result.message}));
             }
             
         }
