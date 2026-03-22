@@ -156,7 +156,7 @@ async function verifyCredentials(type, username, password, ws) {
     let returnObj = {status:false, message:''};
     if (type == "login") {
         try {
-            const hashedPass = await pool.query("SELECT hashedPassword FROM users WHERE username = ($1)",[username]);
+            const hashedPass = toString(await pool.query("SELECT hashedPassword FROM users WHERE username = ($1)",[username]));
             const id = await pool.query("SELECT id FROM users WHERE username = ($1)",[username]);
             if (bcrypt.compare(password, hashedPass)) {
                 const token = generateToken(username, id);
