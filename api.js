@@ -83,7 +83,7 @@ wss.on('connection', function connection(ws) {
             let result = await createAccount(user, pass);
             
             if (result.status) {
-                ws.send(JSON.stringify({type: 'authenticationResult', 'content': `hello`, 'token': `${result.other}`}));
+                ws.send(JSON.stringify({type: 'authenticationResult', 'content': result.message, 'token': `${result.other}`}));
             } else {
                 ws.send(JSON.stringify({type: 'authenticationResult', content: `${result.message}`}));
             }
@@ -146,12 +146,17 @@ function sendMessage() {
 
 };
 
-async function hashString(string) {
-    console.log("Hash function called.")
+async function hashString(input) {
+    console.log("Hash function called: "+input)
     
     bcrypt.genSalt(10, function(err, Salt){
         console.log("Inside the salt function now.");
-        bcrypt.hash(string, Salt, function(error, hash){
+
+        if (err) {
+            console.log("Error during salt.");
+            console.log(err);
+        }
+        bcrypt.hash(input, Salt, function(error, hash){
             console.log("Hashing: "+hash);
             if (error) {
                 console.log("Error during hash.");
@@ -163,7 +168,7 @@ async function hashString(string) {
         })
     });
 
-    return "ERROR OCCURRED";
+    return "ERROR OCCURRED: "+input;
 }
 
 function compareHash(password, hashedPass) {
