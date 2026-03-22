@@ -79,8 +79,8 @@ wss.on('connection', async function connection(ws) {
         //console.log(await pool.query("SELECT * FROM users"));
 
         if (msg.type == "createAccount") {
-            let user = msg.username;
-            let pass = msg.password;
+            const user = msg.username;
+            const pass = msg.password;
             console.log("Starting account creation");
             let result = await createAccount(user, pass, ws);
             console.log(result);
@@ -97,14 +97,21 @@ wss.on('connection', async function connection(ws) {
         } else if (msg.type == "authenticate") {
             let result = await verifyCredentials("authenticate", msg.token, "", ws);
             ws.send(JSON.stringify({type:"authenticationResult", content: result.message, token: result.other}));
+        } else if (msg.type == "sendMessage") {
+            const recipient = msg.recipient;
+            const client = clients.get(recipient)
+            
+            if (client) {
+                client.send("Testing! Did you receive this message?");             
+            }
+
         }
 
         const messageText = data.toString();
         console.log('Received:', messageText);
-        if (messageText == "finn,123") {
-          ws.send("Authentication successful.");
-        }
-        ws.send(`Echo: ${messageText}`);
+        
+
+
     });
 
     ws.on('close', function close() {
@@ -185,6 +192,10 @@ async function verifyCredentials(type, username, password, ws) {
                 ws.authenticated = true;
                 ws.username = payload.username;
                 ws.userId = payload.id;
+
+                returnObj.status = true;
+                returnObj.message = "Token Authentication Successful!";
+
                 clients.set(username, ws);
 
             }
