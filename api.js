@@ -9,6 +9,7 @@ import { WebSocketServer } from 'ws';
 import pool from './db.js';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
+import { timeStamp } from "console";
 
 const app = express();
 const server = createServer(app);
@@ -104,9 +105,15 @@ wss.on('connection', async function connection(ws) {
                 const recipient = msg.recipient;
 
                 const client = clients.get(recipient)
+                
             
                 if (client) {
                     console.log("Option 1, Username test: "+ws.username);
+
+                    let time = new Date().getUTCSeconds();
+
+                    client.send(JSON.stringify({type:'incomingMessage', sender:ws.username, message:msg.message, timeStamp:time}));
+
                     client.send("Incoming Message from: "+ws.username+", Message: "+msg.message);
                     pool.query("INSERT INTO messages (sender, receiver, message, delivered) VALUES ($1, $2, $3, $4)",[ws.username, msg.recipient, msg.message, true]);             
                 } else {
@@ -177,7 +184,9 @@ async function getQueuedMessages(webSocket) {
 
     if (response.rowCount > 0) {
         for (let i = 0; i<response.rowCount; i++) {
-            console.log(JSON.stringify(response.rows[i]));
+            let messageJSON = {type:'incomingMessage', sender:response.rows[i].sender, message:response.rows[i].message, timeStamp:0};
+            webSocket.send(JSON.stringify(messageJSON));
+            //console.log(JSON.stringify(response.rows[i]));
         }
     }
     console.log("Received response from db");
