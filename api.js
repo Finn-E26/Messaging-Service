@@ -71,6 +71,7 @@ const wss = new WebSocketServer({ server });
 wss.on('connection', async function connection(ws) {
     console.log('New client connected');
     ws.authenticated = false;
+    ws.send("You have connected successfully!")
     
     //console.log(await pool.query("ALTER TABLE users DROP CONSTRAINT users_authtoken_key"));
 
@@ -102,7 +103,7 @@ wss.on('connection', async function connection(ws) {
             const client = clients.get(recipient)
             
             if (client) {
-                client.send("Testing! Did you receive this message?");             
+                client.send("Incoming Message from: "+ws.username+", Message: "+msg.message);             
             }
 
         }
