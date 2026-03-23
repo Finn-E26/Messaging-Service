@@ -106,11 +106,13 @@ wss.on('connection', async function connection(ws) {
                 const client = clients.get(recipient)
             
                 if (client) {
+                    console.log("Option 1, Username test: "+ws.username);
                     client.send("Incoming Message from: "+ws.username+", Message: "+msg.message);
                     pool.query("INSERT INTO messages (sender, receiver, message, delivered) VALUES ($1, $2, $3, $4)",[ws.username, msg.recipient, msg.message, true]);             
                 } else {
                     pool.query("INSERT INTO messages (sender, receiver, message, delivered) VALUES ($1, $2, $3, $4)",[ws.username, msg.recipient, msg.message, false]);
                 }
+                ws.send(JSON.stringify({type: 'messageResult', status:true, content: 'Message delivered to the system.'}))
             } else {
                 ws.send(JSON.stringify({type: 'messageResult', status:false, content:'You are not authenticated.'}));
             }
@@ -170,7 +172,7 @@ async function createAccount(username, password, ws) {
 
 async function getQueuedMessages(webSocket) {
     const username = webSocket.username;
-
+    console.log("Option 2, username test: "+username+", "+webSocket.username);
     let response = pool.query("SELECT * FROM messages WHERE recipient = $1 AND delivered = $2"[username,false]);
 
     console.log(response);
@@ -238,16 +240,6 @@ async function hashString(input) {
         console.log("ATTENTION: Error during hashing.");
         return -1;
     }
-}
-
-function compareHash(password, hashedPass) {
-    bcrypt.compare(password, hashedPass, async function(err, match) {
-        if (match) {
-            return true;
-        } else {
-            return false;
-        }
-    })
 }
 
 function generateToken(user, id) {
