@@ -176,7 +176,7 @@ async function getQueuedMessages(webSocket) {
     let response = await pool.query("SELECT * FROM messages WHERE receiver = $1 AND delivered = $2",[username,false]);
 
     if (response.rowCount > 0) {
-        for (let i = 0; i<rresponse.owCount; i++) {
+        for (let i = 0; i<response.rowCount; i++) {
             console.log(JSON.stringify(rows[i]));
         }
     }
