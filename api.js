@@ -173,7 +173,7 @@ async function createAccount(username, password, ws) {
 async function getQueuedMessages(webSocket) {
     const username = webSocket.username;
     console.log("Option 2, username test: "+username+", "+webSocket.username);
-    let response = await pool.query("SELECT * FROM messages WHERE recipient = $1 AND delivered = $2",[username,false]);
+    let response = await pool.query("SELECT * FROM messages WHERE receiver = $1 AND delivered = $2",[username,false]);
     console.log("Received response from db");
     console.log(response);
 }
