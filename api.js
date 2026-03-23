@@ -188,6 +188,8 @@ async function getQueuedMessages(webSocket) {
             webSocket.send(JSON.stringify(messageJSON));
             //console.log(JSON.stringify(response.rows[i]));
         }
+
+        pool.query("UPDATE messages SET delivered = TRUE WHERE username = $1 AND delivered = FALSE",[webSocket.username]);
     }
     console.log("Received response from db");
     //console.log(response);
