@@ -98,7 +98,7 @@ wss.on('connection', async function connection(ws) {
         } else if (msg.type == "authenticate") {
             let result = await verifyCredentials("authenticate", msg.token, "", ws);
             ws.send(JSON.stringify({type:"authenticationResult", content: result.message, token: result.other}));
-        } else if (msg.type == "sendMessage") {
+        } else if (msg.type == "sendMessage" && ws.authenticated == true) {
             const recipient = msg.recipient;
             const client = clients.get(recipient)
             
