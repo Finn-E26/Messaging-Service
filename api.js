@@ -174,6 +174,12 @@ async function getQueuedMessages(webSocket) {
     const username = webSocket.username;
     console.log("Option 2, username test: "+username+", "+webSocket.username);
     let response = await pool.query("SELECT * FROM messages WHERE receiver = $1 AND delivered = $2",[username,false]);
+
+    if (response.rowCount > 0) {
+        for (i = 0; i<rowCount; i++) {
+            console.log(JSON.stringify(rows[i]));
+        }
+    }
     console.log("Received response from db");
     console.log(response);
 }
