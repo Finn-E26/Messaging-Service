@@ -134,6 +134,9 @@ wss.on('connection', async function connection(ws) {
 
     ws.on('close', function close() {
         console.log('Client disconnected');
+        if (clients.get(ws.username)) {
+            clients.delete(ws.username);
+        }
     });
 });
 
