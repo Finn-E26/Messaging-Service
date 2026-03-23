@@ -95,17 +95,25 @@ wss.on('connection', async function connection(ws) {
         } else if (msg.type == "login") {
             let result = await verifyCredentials("login", msg.username, msg.password, ws);
             ws.send(JSON.stringify({type:"authenticationResult", content: result.message, token: result.other}));
+            getQueuedMessages(ws);
         } else if (msg.type == "authenticate") {
             let result = await verifyCredentials("authenticate", msg.token, "", ws);
             ws.send(JSON.stringify({type:"authenticationResult", content: result.message, token: result.other}));
-        } else if (msg.type == "sendMessage" && ws.authenticated == true) {
-            const recipient = msg.recipient;
-            const client = clients.get(recipient)
-            
-            if (client) {
-                client.send("Incoming Message from: "+ws.username+", Message: "+msg.message);             
-            }
+        } else if (msg.type == "sendMessage") {
+            if (ws.authenticated == true) {
+                const recipient = msg.recipient;
 
+                const client = clients.get(recipient)
+            
+                if (client) {
+                    client.send("Incoming Message from: "+ws.username+", Message: "+msg.message);
+                    pool.query("INSERT INTO messages (sender, receiver, message, delivered) VALUES ($1, $2, $3, $4)",[ws.username, msg.recipient, msg.message, true]);             
+                } else {
+                    pool.query("INSERT INTO messages (sender, receiver, message, delivered) VALUES ($1, $2, $3, $4)",[ws.username, msg.recipient, msg.message, false]);
+                }
+            } else {
+                ws.send(JSON.stringify({type: 'messageResult', status:false, content:'You are not authenticated.'}));
+            }
         }
 
         const messageText = data.toString();
@@ -160,6 +168,14 @@ async function createAccount(username, password, ws) {
 
 };
 
+async function getQueuedMessages(webSocket) {
+    const username = webSocket.username;
+
+    let response = pool.query("SELECT * FROM messages WHERE recipient = $1 AND delivered = $2"[username,false]);
+
+    console.log(response);
+}
+
 async function verifyCredentials(type, username, password, ws) {
     let returnObj = {status:false, message:''};
     if (type == "login") {
@@ -208,10 +224,6 @@ async function verifyCredentials(type, username, password, ws) {
     }
 
     return returnObj;
-};
-
-function sendMessage() {
-
 };
 
 async function hashString(input) {
