@@ -177,7 +177,7 @@ async function getQueuedMessages(webSocket) {
 
     if (response.rowCount > 0) {
         for (let i = 0; i<response.rowCount; i++) {
-            console.log(JSON.stringify(rows[i]));
+            console.log(JSON.stringify(response.rows[i]));
         }
     }
     console.log("Received response from db");
