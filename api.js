@@ -21,55 +21,8 @@ app.use(express.static('public'));
 
 app.get('/', (req, res) => {
   console.log("Sending data!");
-  res.send(`<!DOCTYPE html>
-        <html>
-            <head>
-                <title>Portfolio Project Test</title>
-                <style>
-                    body { font-family: Arial, sans-serif; margin: 40px; }
-                    #messages { border: 1px solid #ccc; height: 300px; 
-                               overflow-y: scroll; padding: 10px; margin-bottom: 10px; }
-                    #messageInput { width: 300px; padding: 5px; }
-                    button { padding: 5px 10px; }
-                </style>
-            </head>
-            <body>
-                <h1>Database Initialization</h1>
-                <div id="messages"></div>
-                <input type="text" id="messageInput" placeholder="Enter your message">
-                <button onclick="sendMessage()">Send Message</button>
-                <script>
-                    const ws = new WebSocket('wss://messaging-server-e0oe.onrender.com');
-                    const messages = document.getElementById('messages');
-
-                    ws.onmessage = function(event) {
-                        const messageDiv = document.createElement('div');
-                        messageDiv.textContent = event.data;
-                        messages.appendChild(messageDiv);
-                        messages.scrollTop = messages.scrollHeight;
-                    };
-
-                    function sendMessage() {
-                        const input = document.getElementById('messageInput');
-                        if (input.value) {
-                            ws.send(input.value);
-                            input.value = '';
-                        }
-                    }
-
-                    document.getElementById('messageInput').addEventListener('keypress', function(e) {
-                        if (e.key === 'Enter') {
-                            sendMessage();
-                        }
-                    });
-                </script>
-            </body>
-        </html>
-  `);
+  res.send('The API is online and available.');
 });
-
-pool.query("DELETE FROM users");
-pool.query("DELETE FROM messages");
 
 const wss = new WebSocketServer({ server });
 wss.on('connection', async function connection(ws) {
