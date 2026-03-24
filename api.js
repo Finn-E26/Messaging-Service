@@ -148,7 +148,7 @@ async function getMessages(webSocket, sender) {
 
     if (response.rowCount > 0) {
         for (let i = 0; i<response.rowCount; i++) {
-            let messageJSON = {type:'loadMessages', 'sender':response.rows[0].sender, message:response.rows[i].message, timeStamp:0};
+            let messageJSON = {type:'loadMessages', 'sender':response.rows[i].sender, message:response.rows[i].message, timeStamp:0};
             webSocket.send(JSON.stringify(messageJSON));
         }
     }
