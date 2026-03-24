@@ -95,9 +95,12 @@ wss.on('connection', async function connection(ws) {
     });
 
     ws.on('close', function close() {
-        console.log('Client disconnected');
+        //console.log('Client disconnected');
         if (clients.get(ws.username)) {
+            console.log("Client: "+ws.username+"has disconnected")
             clients.delete(ws.username);
+        } else {
+            console.log("Unauthenticated client disconnected.")
         }
     });
 });
