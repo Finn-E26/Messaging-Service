@@ -88,18 +88,18 @@ wss.on('connection', async function connection(ws) {
             console.log(result);
             
             if (result.status) {
-                ws.send(JSON.stringify({type: 'authenticationResult', 'content': result.message, 'token': result.other}));
+                ws.send(JSON.stringify({type: 'authenticationResult',status:result.status, 'content': result.message, 'token': result.other}));
             } else {
-                ws.send(JSON.stringify({type: 'authenticationResult', content: `${result.message}`}));
+                ws.send(JSON.stringify({type: 'authenticationResult',status:result.status, content: `${result.message}`}));
             }
             
         } else if (msg.type == "login") {
             let result = await verifyCredentials("login", msg.username, msg.password, ws);
-            ws.send(JSON.stringify({type:"authenticationResult", content: result.message, token: result.other}));
+            ws.send(JSON.stringify({type:"authenticationResult", status:result.status, content: result.message, token: result.other}));
             getQueuedMessages(ws);
         } else if (msg.type == "authenticate") {
             let result = await verifyCredentials("authenticate", msg.token, "", ws);
-            ws.send(JSON.stringify({type:"authenticationResult", content: result.message, token: result.other}));
+            ws.send(JSON.stringify({type:"authenticationResult", status:result.status, content: result.message, token: result.other}));
         } else if (msg.type == "sendMessage") {
             if (ws.authenticated == true) {
                 const recipient = msg.recipient;
@@ -122,6 +122,12 @@ wss.on('connection', async function connection(ws) {
                 ws.send(JSON.stringify({type: 'messageResult', status:true, content: 'Message delivered to the system.'}))
             } else {
                 ws.send(JSON.stringify({type: 'messageResult', status:false, content:'You are not authenticated.'}));
+            }
+        } else if (msg.type == "loadConversation") {
+            if (ws.authenticated == true) {
+                getMessages(ws, msg.sender);
+            } else {
+                ws.send(401);
             }
         }
 
@@ -179,6 +185,18 @@ async function createAccount(username, password, ws) {
     }
 
 };
+
+async function getMessages(webSocket, sender) {
+    const username = webSocket.username;
+    let response = await pool.query("SELECT * FROM messages WHERE receiver = $1 AND sender = $2 AND delivered = TRUE",[username, sender]);
+
+    if (response.rowCount > 0) {
+        for (let i = 0; i<response.rowCount; i++) {
+            let messageJSON = {type:'loadMessages', 'sender':response.rows[i].sender, message:response.rows[i].message, timeStamp:0};
+            webSocket.send(JSON.stringify(messageJSON));
+        }
+    }
+}
 
 async function getQueuedMessages(webSocket) {
     const username = webSocket.username;
