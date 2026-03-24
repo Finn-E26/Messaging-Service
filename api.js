@@ -119,7 +119,7 @@ async function createAccount(username, password, ws) {
         return returnObj;
     } 
 
-    console.log("Getting hashes......");
+    //console.log("Getting hashes......");
     let hashedPass = await hashString(password);
 
     result = await pool.query("INSERT INTO users (username, hashedPassword, role) VALUES ($1, $2, $3)", [username, hashedPass, 'user']);
@@ -159,7 +159,7 @@ async function getMessages(webSocket, sender) {
 
 async function getQueuedMessages(webSocket) {
     const username = webSocket.username;
-    console.log("Option 2, username test: "+username+", "+webSocket.username);
+    //console.log("Option 2, username test: "+username+", "+webSocket.username);
     let response = await pool.query("SELECT * FROM messages WHERE receiver = $1 AND delivered = $2",[username,false]);
 
     if (response.rowCount > 0) {
@@ -175,7 +175,7 @@ async function getQueuedMessages(webSocket) {
             console.log(error);
         }
     }
-    console.log("Received response from db");
+    //console.log("Received response from db");
     //console.log(response);
 }
 
@@ -185,14 +185,14 @@ async function verifyCredentials(type, username, password, ws) {
         console.log("Logging in: "+username+", "+password);
         try {
             let hashedPass = await pool.query("SELECT hashedpassword FROM users WHERE username = $1",[username]);
-            console.log(hashedPass);
+            //console.log(hashedPass);
             hashedPass = hashedPass.rows[0].hashedpassword;
-            console.log(hashedPass);
+            //console.log(hashedPass);
 
             let id = await pool.query("SELECT id FROM users WHERE username = $1",[username]);
 
             if (await bcrypt.compare(password, hashedPass)) {
-                console.log(hashedPass);
+                //console.log(hashedPass);
                 let token = generateToken(username, id);
                 returnObj.status = true;
                 returnObj.message = "Authentication Successful!";
