@@ -227,17 +227,13 @@ async function verifyCredentials(type, username, password, ws) {
         try {
             let hashedPass = await pool.query("SELECT hashedpassword FROM users WHERE username = $1",[username]);
             console.log(hashedPass);
-            hashedPass = hashedPass.rows[0];
+            hashedPass = hashedPass.rows[0].hashedpassword;
             console.log(hashedPass);
 
-            /*if (hashedPass == undefined) {
-                hashedPass = '';
-            }*/
-
-            const id = await pool.query("SELECT id FROM users WHERE username = $1",[username]);
-            if (bcrypt.compare(password, hashedPass)) {
+            let id = await pool.query("SELECT id FROM users WHERE username = $1",[username]);
+            if (await bcrypt.compare(password, hashedPass)) {
                 console.log(hashedPass);
-                const token = generateToken(username, id);
+                let token = generateToken(username, id);
                 returnObj.status = true;
                 returnObj.message = "Authentication Successful!";
                 returnObj.other = token;
