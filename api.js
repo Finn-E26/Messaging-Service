@@ -225,9 +225,7 @@ async function verifyCredentials(type, username, password, ws) {
     if (type == "login") {
         console.log("Logging in: "+username+", "+password);
         try {
-            let hashedPass = await pool.query("SELECT * FROM users WHERE username = $1",[username]);
-            let test = await pool.query("SELECT * FROM users");
-            console.log(test);
+            let hashedPass = await pool.query("SELECT hashedpassword FROM users WHERE username = $1",[username]);
             console.log(hashedPass);
             hashedPass = hashedPass.rows[0];
             console.log(hashedPass);
