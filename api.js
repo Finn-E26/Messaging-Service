@@ -144,11 +144,11 @@ async function createAccount(username, password, ws) {
 
 async function getMessages(webSocket, sender) {
     const username = webSocket.username;
-    let response = await pool.query("SELECT * FROM messages WHERE receiver = $1 AND sender = $2 AND delivered = TRUE",[username, sender]);
+    let response = await pool.query("SELECT * FROM messages WHERE (receiver = $1 AND sender = $2) OR (receiver = $2 AND sender = $1) ORDER BY senttime",[username, sender]);
 
     if (response.rowCount > 0) {
         for (let i = 0; i<response.rowCount; i++) {
-            let messageJSON = {type:'loadMessages', 'sender':response.rows[i].sender, message:response.rows[i].message, timeStamp:0};
+            let messageJSON = {type:'loadMessages', 'sender':response.rows[0].sender, message:response.rows[i].message, timeStamp:0};
             webSocket.send(JSON.stringify(messageJSON));
         }
     }
