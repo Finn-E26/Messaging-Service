@@ -68,6 +68,9 @@ app.get('/', (req, res) => {
   `);
 });
 
+pool.query("DELETE FROM users");
+pool.query("DELETE FROM messages");
+
 const wss = new WebSocketServer({ server });
 wss.on('connection', async function connection(ws) {
     console.log('New client connected');
@@ -231,6 +234,7 @@ async function verifyCredentials(type, username, password, ws) {
             console.log(hashedPass);
 
             let id = await pool.query("SELECT id FROM users WHERE username = $1",[username]);
+
             if (await bcrypt.compare(password, hashedPass)) {
                 console.log(hashedPass);
                 let token = generateToken(username, id);
